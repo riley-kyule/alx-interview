@@ -18,4 +18,4 @@ def pascal_triangle(n):
             current.append(previous[i] + previous[i + 1])
         current.append(1)
         triangle.append(current)
-    return triangle    
+    return triangle
