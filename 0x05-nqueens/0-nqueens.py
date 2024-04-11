@@ -57,3 +57,4 @@ board = [["."] * N for i in range(N)]
 
 # Solve the N queens problem
 solve_nqueens(0)
+
