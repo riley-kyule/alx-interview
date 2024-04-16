@@ -40,3 +40,4 @@ async function printChars () {
 }
 
 printChars();
+
