@@ -1,81 +1,68 @@
 #!/usr/bin/python3
 """
-simple Python program that solves the N queens problem using a
-recursive backtracking approach to find all possible solutions:
+Solution to the nqueens problem
 """
-
 import sys
 
 
-def nqueens():
+def backtrack(r, n, cols, pos, neg, board):
     """
-    N Queens
+    backtrack function to find solution
     """
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        exit(1)
+    if r == n:
+        res = []
+        for l in range(len(board)):
+            for k in range(len(board[l])):
+                if board[l][k] == 1:
+                    res.append([l, k])
+        print(res)
+        return
 
-    try:
-        n = int(sys.argv[1])
-    except ValueError:
-        print("N must be a number")
-        exit(1)
+    for c in range(n):
+        if c in cols or (r + c) in pos or (r - c) in neg:
+            continue
 
-    if n < 4:
-        print("N must be at least 4")
-        exit(1)
+        cols.add(c)
+        pos.add(r + c)
+        neg.add(r - c)
+        board[r][c] = 1
 
-    board = [[0 for col in range(n)] for row in range(n)]
-    solve(board, 0, n)
+        backtrack(r+1, n, cols, pos, neg, board)
+
+        cols.remove(c)
+        pos.remove(r + c)
+        neg.remove(r - c)
+        board[r][c] = 0
 
 
-def solve(board, col, n):
+def nqueens(n):
     """
-    Solve N Queens
+    Solution to nqueens problem
+    Args:
+        n (int): number of queens. Must be >= 4
+    Return:
+        List of lists representing coordinates of each
+        queen for all possible solutions
     """
-    if col == n:
-        print_board(board)
-        return True
+    cols = set()
+    pos_diag = set()
+    neg_diag = set()
+    board = [[0] * n for i in range(n)]
 
-    res = False
-    for i in range(n):
-        if is_safe(board, i, col, n):
-            board[i][col] = 1
-            res = solve(board, col + 1, n) or res
-            board[i][col] = 0
-    return res
-
-
-def is_safe(board, row, col, n):
-    """
-    Check if a queen can be placed on board[row][col]
-    """
-    for i in range(col):
-        if board[row][i] == 1:
-            return False
-
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i][j] == 1:
-            return False
-
-    for i, j in zip(range(row, n, 1), range(col, -1, -1)):
-        if board[i][j] == 1:
-            return False
-
-    return True
-
-
-def print_board(board):
-    """
-    Print board
-    """
-    queens = []
-    for i in range(len(board)):
-        for j in range(len(board)):
-            if board[i][j] == 1:
-                queens.append([i, j])
-    print(queens)
+    backtrack(0, n, cols, pos_diag, neg_diag, board)
 
 
 if __name__ == "__main__":
-    nqueens()
+    n = sys.argv
+    if len(n) != 2:
+        print("Usage: nqueens N")
+        sys.exit(1)
+    try:
+        nn = int(n[1])
+        if nn < 4:
+            print("N must be at least 4")
+            sys.exit(1)
+        nqueens(nn)
+    except ValueError:
+        print("N must be a number")
+        sys.exit(1)
