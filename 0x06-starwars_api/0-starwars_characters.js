@@ -1,38 +1,25 @@
 #!/usr/bin/node
-
 const request = require('request');
+const API_URL = 'https://swapi-api.hbtn.io/api';
 
-const filmId = process.argv[2];
-const filmUrl = `https://swapi-api.alx-tools.com/api/films/${filmId}/`;
-
-request(filmUrl, async (error, response, body) => {
-  if (error) {
-    console.log(error);
-    return;
-  }
-
-  try {
-    const parsedData = JSON.parse(body);
-    const characters = parsedData.characters;
-
-    for (const characterUrl of characters) {
-      const characterResponse = await getRequest(characterUrl);
-      const characterData = JSON.parse(characterResponse.body);
-      console.log(characterData.name);
+if (process.argv.length > 2) {
+  request(`${API_URL}/films/${process.argv[2]}/`, (err, _, body) => {
+    if (err) {
+      console.log(err);
     }
-  } catch (parseError) {
-    console.error('Error parsing data:', parseError);
-  }
-});
+    const charactersURL = JSON.parse(body).characters;
+    const charactersName = charactersURL.map(
+      url => new Promise((resolve, reject) => {
+        request(url, (promiseErr, __, charactersReqBody) => {
+          if (promiseErr) {
+            reject(promiseErr);
+          }
+          resolve(JSON.parse(charactersReqBody).name);
+        });
+      }));
 
-function getRequest (url) {
-  return new Promise((resolve, reject) => {
-    request(url, (error, response, body) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(response);
-      }
-    });
+    Promise.all(charactersName)
+      .then(names => console.log(names.join('\n')))
+      .catch(allErr => console.log(allErr));
   });
 }
