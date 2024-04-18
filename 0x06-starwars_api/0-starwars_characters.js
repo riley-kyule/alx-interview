@@ -1,20 +1,28 @@
 #!/usr/bin/node
-const util = require('util');
-const request = util.promisify(require('request'));
-const filmID = process.argv[2];
+/* Prints all Casts of Star Wars movie
+Read the README.md file for more info
+*/
 
-async function starwarsCharacters (filmId) {
-  const endpoint = 'https://swapi-api.hbtn.io/api/films/' + filmId;
-  let response = await (await request(endpoint)).body;
-  response = JSON.parse(response);
-  const characters = response.characters;
+const request = require('request');
+const starWarsAPI = 'https://swapi-api.alx-tools.com/api/';
+const endPoint = 'films/';
+const movieID = process.argv[2].toString();
 
-  for (let i = 0; i < characters.length; i++) {
-    const urlCharacter = characters[i];
-    let character = await (await request(urlCharacter)).body;
-    character = JSON.parse(character);
-    console.log(character.name);
-  }
+request(starWarsAPI + endPoint + movieID, function (error, _, body) {
+  if (error) console.error(error);
+  const objects = JSON.parse(body);
+  const casts = objects.characters;
+  Printresult(casts);
+});
+
+/* reculsively and synchronously request for each character
+and prints out the casts */
+function Printresult (casts, counter = 0) {
+  request(casts[counter], function (error, _, body) {
+    if (error) console.error(error);
+    console.log(JSON.parse(body).name);
+    if (++counter < casts.length) {
+      Printresult(casts, counter++);
+    }
+  });
 }
-
-starwarsCharacters(filmID);
