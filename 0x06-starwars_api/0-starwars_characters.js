@@ -1,28 +1,41 @@
 #!/usr/bin/node
-
 const request = require('request');
 
-const filmNum = process.argv[2] + '/';
-const filmURL = 'https://swapi-api.hbtn.io/api/films/';
+if (process.argv.length !== 3) {
+  console.log('Usage: ./0-starwars_characters.js <n>');
+  process.exit(1);
+}
 
-// API request to get film information
-request(filmURL + filmNum, async function (err, res, body) {
-  if (err) return console.error(err);
+const id = process.argv[2];
+if (isNaN(id)) {
+  console.log('<n> must be an integer');
+  process.exit(1);
+}
 
-  // Get the list of character URLs
-  const charURLList = JSON.parse(body).characters;
-
-  // Iterare through the character URLs
-  // Make a request to each character URL
-  for (const charURL of charURLList) {
-    await new Promise(function (resolve, reject) {
-      request(charURL, function (err, res, body) {
-        if (err) return console.error(err);
-
-        // Print character's name Resolve the promise to indicate completion
-        console.log(JSON.parse(body).name);
-        resolve();
-      });
+function promiseRequest (url) {
+  return new Promise((resolve, reject) => {
+    request.get(url, (error, response, body) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(JSON.parse(body));
     });
+  });
+}
+
+async function printChars () {
+  const url = `https://swapi-api.alx-tools.com/api/films/${id}`;
+  try {
+    const response = await promiseRequest(url);
+    const characters = response.characters;
+    for (const character of characters) {
+      const body = await promiseRequest(character);
+      const name = body.name;
+      console.log(name);
+    }
+  } catch (err) {
+    console.error(err);
   }
-});
+}
+
+printChars();
