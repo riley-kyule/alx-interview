@@ -1,28 +1,38 @@
 #!/usr/bin/node
-/* Prints all Casts of Star Wars movie
-Read the README.md file for more info
-*/
 
 const request = require('request');
-const starWarsAPI = 'https://swapi-api.alx-tools.com/api/';
-const endPoint = 'films/';
-const movieID = process.argv[2].toString();
 
-request(starWarsAPI + endPoint + movieID, function (error, _, body) {
-  if (error) console.error(error);
-  const objects = JSON.parse(body);
-  const casts = objects.characters;
-  Printresult(casts);
+const filmId = process.argv[2];
+const filmUrl = `https://swapi-api.alx-tools.com/api/films/${filmId}/`;
+
+request(filmUrl, async (error, response, body) => {
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  try {
+    const parsedData = JSON.parse(body);
+    const characters = parsedData.characters;
+
+    for (const characterUrl of characters) {
+      const characterResponse = await getRequest(characterUrl);
+      const characterData = JSON.parse(characterResponse.body);
+      console.log(characterData.name);
+    }
+  } catch (parseError) {
+    console.error('Error parsing data:', parseError);
+  }
 });
 
-/* reculsively and synchronously request for each character
-and prints out the casts */
-function Printresult (casts, counter = 0) {
-  request(casts[counter], function (error, _, body) {
-    if (error) console.error(error);
-    console.log(JSON.parse(body).name);
-    if (++counter < casts.length) {
-      Printresult(casts, counter++);
-    }
+function getRequest (url) {
+  return new Promise((resolve, reject) => {
+    request(url, (error, response, body) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(response);
+      }
+    });
   });
 }
