@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-"""Coin change problem
+"""
+Coin change problem
+
 """
 from typing import List
 
